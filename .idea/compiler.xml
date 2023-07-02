@@ -7,10 +7,12 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="Atf-TpPos" />
+        <module name="tpplot" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="Atf-TpPos" target="1.8" />
+      <module name="tpplot" target="16" />
     </bytecodeTargetLevel>
   </component>
 </project>

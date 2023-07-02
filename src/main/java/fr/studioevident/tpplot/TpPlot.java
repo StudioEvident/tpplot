@@ -8,20 +8,14 @@ import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import fr.studioevident.tpplot.commands.TpPlotCommand;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public final class TpPlot extends JavaPlugin {
     private WorldGuard worldGuard;
@@ -62,7 +56,13 @@ public final class TpPlot extends JavaPlugin {
     public Map<String, ProtectedRegion> getRegionsOfWorld(World worldMc) {
         com.sk89q.worldedit.world.World world = BukkitAdapter.adapt(worldMc);
 
-        return worldGuard.getPlatform().getRegionContainer().get(world).getRegions();
+        Map<String, ProtectedRegion> regions = new HashMap<>(
+                Objects.requireNonNull(
+                        worldGuard.getPlatform().getRegionContainer().get(world)
+                ).getRegions()
+        );
+        regions.remove("__global__");
+        return regions;
     }
 
     public List<Player> getPlayersWithPlot(World world) {
@@ -84,14 +84,17 @@ public final class TpPlot extends JavaPlugin {
         return players;
     }
 
-    public List<String> getPlotsNamesOfPlayer(World world, Player player) {
+    public List<String> getPlotsNamesOfPlayer(World world, OfflinePlayer player) {
+        if (player == null) {
+            return new ArrayList<>();
+        }
+
         Map<String, ProtectedRegion> regions = getRegionsOfWorld(world);
-        UUID playerUuid = player.getUniqueId();
 
         List<String> regionsNames = new ArrayList<>();
         for (String regionName : regions.keySet()) {
             ProtectedRegion region = regions.get(regionName);
-            if (region.getOwners().contains(playerUuid)) regionsNames.add(regionName);
+            if (region.getOwners().contains(player.getUniqueId())) regionsNames.add(regionName);
         }
 
         return regionsNames;
@@ -111,6 +114,6 @@ public final class TpPlot extends JavaPlugin {
             }
         }
 
-        return new Location(world, x, world.getMaxHeight(), z);
+        return loc;
     }
 }

@@ -6,10 +6,7 @@ import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 import fr.studioevident.tpplot.TpPlot;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -32,29 +29,46 @@ public class TpPlotCommand implements CommandExecutor, TabCompleter {
         Player player = (Player)sender;
         World world = player.getWorld();
 
-        plugin.getPlayersWithPlot(world);
-
         if (player.getGameMode() != GameMode.CREATIVE) {
             plugin.sendMessage(player, "§cVous ne pouvez pas exécuter cette commande !");
             return true;
         }
 
-        if (args.length != 2) {
+        if (args.length != 1 && args.length != 2) {
             plugin.sendMessage(player, "§cNombre d'arguments invalide !");
             return true;
         }
 
-        Map<String, ProtectedRegion> regions = plugin.getRegionsOfWorld(world);
-        String plotName = args[1];
+        Map<String, ProtectedRegion> allRegions = plugin.getRegionsOfWorld(world);
+        List<String> regions = plugin.getPlotsNamesOfPlayer(world, Bukkit.getOfflinePlayerIfCached(args[0]));
 
-        ProtectedRegion plot = regions.get(plotName);
+        ProtectedRegion plot;
+        if (args.length == 2)
+        {
+            String plotName = args[1];
+            plot = allRegions.get(plotName);
+        }
+        else if (regions.size() == 1)
+        {
+            plot = allRegions.get(regions.get(0));
+        }
+        else if (regions.size() == 0)
+        {
+            plugin.sendMessage(player, "§cCe joueur n'a aucun plot !");
+            return true;
+        }
+        else
+        {
+            plugin.sendMessage(player, "§cCe joueur a plusieurs plots: " + ChatColor.GOLD + String.join(", ", regions));
+            return true;
+        }
+
         if (plot == null) {
             plugin.sendMessage(player, "§cPlot introuvable !");
             return true;
         }
 
         player.teleport(plugin.getTpPoint(world, plot));
-
         return true;
     }
 
@@ -72,10 +86,7 @@ public class TpPlotCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 2) {
-            Player playerTabbed = Bukkit.getPlayer(args[0]);
-            if (playerTabbed == null) return new ArrayList<>();
-
-            return plugin.getPlotsNamesOfPlayer(player.getWorld(), playerTabbed);
+            return plugin.getPlotsNamesOfPlayer(player.getWorld(), Bukkit.getOfflinePlayerIfCached(args[0]));
         }
 
         return new ArrayList<>();

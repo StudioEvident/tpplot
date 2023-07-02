@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Atf-TpPos.iml" filepath="$PROJECT_DIR$/Atf-TpPos.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tpplot.iml" filepath="$PROJECT_DIR$/tpplot.iml" />
     </modules>
   </component>
 </project>
